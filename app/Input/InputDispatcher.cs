@@ -17,6 +17,7 @@ namespace GHelper.Input
     {
         System.Timers.Timer timer = new System.Timers.Timer(AppConfig.Get("keyboard_timeout_refresh", 1000));
         public static bool backlightActivity = true;
+        private static CancellationTokenSource? backlightFade;
         public static bool lidClose = false;
         public static bool tentMode = false;
         private static bool? _fnLock = null;
@@ -80,13 +81,13 @@ namespace GHelper.Input
             if (backlightActivity && iddle.TotalSeconds > kb_timeout)
             {
                 backlightActivity = false;
-                Aura.ApplyBrightness(0, "Timeout");
+                FadeBacklight(GetBacklight(), 0, "Timeout");
             }
 
             if (!backlightActivity && iddle.TotalSeconds < kb_timeout)
             {
                 backlightActivity = true;
-                SetBacklightAuto();
+                if (!lidClose && !tentMode) FadeBacklight(0, GetBacklight(), "Auto");
             }
 
             //Logger.WriteLine("Iddle: " + iddle.TotalSeconds);
@@ -1149,8 +1150,36 @@ namespace GHelper.Input
         public static void SetBacklightAuto()
         {
             if (lidClose || tentMode) return;
+            backlightFade?.Cancel();
             Aura.ApplyBrightness(GetBacklight(), "Auto");
             backlightActivity = true;
+        }
+
+        static void FadeBacklight(int from, int to, string log)
+        {
+            backlightFade?.Cancel();
+
+            int stepDelay = AppConfig.Get("keyboard_fade_step", 0);
+            if (stepDelay <= 0 || Math.Abs(to - from) < 2)
+            {
+                Aura.ApplyBrightness(to, log);
+                return;
+            }
+
+            var fade = new CancellationTokenSource();
+            backlightFade = fade;
+            int direction = Math.Sign(to - from);
+
+            Task.Run(async () =>
+            {
+                for (int level = from + direction; ; level += direction)
+                {
+                    if (fade.IsCancellationRequested) return;
+                    Aura.ApplyBrightness(level, log);
+                    if (level == to) return;
+                    await Task.Delay(stepDelay);
+                }
+            });
         }
 
         public static void StartupBacklight()
