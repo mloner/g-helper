@@ -1,3 +1,11 @@
+> [!NOTE]
+> **About this fork.** This is a personal fork of [seerge/g-helper](https://github.com/seerge/g-helper) with one change: an optional stepped fade for the keyboard backlight on idle timeout. Everything else is upstream G-Helper. Fork builds are on the [releases page of this fork](https://github.com/mloner/g-helper/releases); the official app is at [seerge/g-helper releases](https://github.com/seerge/g-helper/releases).
+>
+> **Changes against upstream** (GPL-3.0, modified 2026-10-18):
+> - `"keyboard_fade_step": <ms>` in `%AppData%\GHelper\config.json` (default `0`, off). When the backlight timeout fires, the backlight steps down level by level; on activity it comes back starting at level 1 and steps up to the configured level. Upstream's `"keyboard_timeout_refresh": <ms>` (default `1000`) sets how often activity is checked.
+>
+> **Branches:** `main` mirrors upstream; `custom` is the latest upstream release plus the fork changes and is what fork releases are built from.
+
 # G-Helper - Lightweight control tool for Asus laptops
 
 Small and lightweight Armoury Crate alternative for Asus laptops offering almost same functionality with a much smaller footprint. Works with all popular models, such as ROG Zephyrus G14, G15, G16, M16, X13, X16, Z13, DUO, TUF Series, Strix or Scar Series, ProArt, Vivobook, Zenbook, Expertbook, ROG Ally or Ally X and many more!
